@@ -186,6 +186,7 @@ export default function ErpDashboard() {
               students={students}
               onSelectStudent={(st) => setSelectedStudent(st)}
               onNewStudent={() => setIsAddStudentOpen(true)}
+              onNavigateTab={(tab) => setActiveTab(tab)}
               onViewAllStudents={() => setActiveTab("students")}
               onViewBatches={() => setActiveTab("batches")}
             />
@@ -255,6 +256,7 @@ export default function ErpDashboard() {
 
       {/* Slide-over Student Profile Drawer */}
       <StudentProfileDrawer
+        isOpen={Boolean(selectedStudent)}
         student={selectedStudent}
         batches={batches}
         academyCourses={academyCourses}

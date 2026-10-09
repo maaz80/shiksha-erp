@@ -37,10 +37,11 @@ export default function StudentProfileDrawer({
   onClose,
   student,
   batches = [],
+  academyCourses = [],
   onStudentUpdated
 }) {
-  const [profile, setProfile] = useState(student);
-  const [catalogCourses, setCatalogCourses] = useState([]);
+  const [studentProfile, setProfile] = useState(student);
+  const [catalogCourses, setCatalogCourses] = useState(academyCourses || []);
   const [selectedCourseToUnlock, setSelectedCourseToUnlock] = useState("");
   const [unlocking, setUnlocking] = useState(false);
 
@@ -64,18 +65,30 @@ export default function StudentProfileDrawer({
         })
         .catch(() => {});
 
-      fetchAcademyCoursesApi()
-        .then((res) => {
-          if (res?.success && res?.courses) {
-            setCatalogCourses(res.courses);
-            if (res.courses.length > 0) setSelectedCourseToUnlock(res.courses[0]._id);
-          }
-        })
-        .catch(() => {});
+      if (academyCourses && academyCourses.length > 0) {
+        setCatalogCourses(academyCourses);
+        setSelectedCourseToUnlock((prev) => prev || academyCourses[0]._id);
+      } else {
+        fetchAcademyCoursesApi()
+          .then((res) => {
+            if (res?.success && res?.courses) {
+              setCatalogCourses(res.courses);
+              if (res.courses.length > 0) setSelectedCourseToUnlock((prev) => prev || res.courses[0]._id);
+            }
+          })
+          .catch(() => {});
+      }
+    } else {
+      setProfile(null);
     }
-  }, [student]);
+  }, [student, academyCourses]);
 
-  if (!isOpen || !profile) return null;
+  const activeStudent = studentProfile && studentProfile._id === student?._id ? studentProfile : student;
+  const isDrawerOpen = isOpen !== undefined ? isOpen : Boolean(student);
+
+  if (!isDrawerOpen || !activeStudent) return null;
+
+  const profile = activeStudent;
 
   // 1. Batch Allocation Change
   const handleBatchChange = async (newBatchId) => {
